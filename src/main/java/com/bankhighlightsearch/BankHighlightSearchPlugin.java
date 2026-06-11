@@ -16,6 +16,7 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.MenuAction;
 import net.runelite.api.ScriptID;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.gameval.InterfaceID;
@@ -253,6 +254,20 @@ public class BankHighlightSearchPlugin extends Plugin
 		// fires during this call and onScriptPostFired performs the scroll
 		pendingScroll = true;
 		client.runScript(buildArgs);
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		if (event.getActionParam1() == InterfaceID.Bankmain.SEARCH
+			&& event.getOption().equals("Search"))
+		{
+			client.createMenuEntry(-1)
+				.setOption("Highlight search")
+				.setTarget(event.getTarget())
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> openSearch());
+		}
 	}
 
 	@Subscribe
