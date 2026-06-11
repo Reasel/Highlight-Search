@@ -304,7 +304,11 @@ public class BankHighlightSearchPlugin extends Plugin
 	{
 		if (BankHighlightSearchConfig.GROUP.equals(event.getGroup()))
 		{
-			clientThread.invoke(this::refreshMatches);
+			clientThread.invoke(() ->
+			{
+				overlay.invalidateGlowCache();
+				refreshMatches();
+			});
 		}
 	}
 }

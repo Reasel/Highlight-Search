@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 public enum HighlightStyle
 {
 	ITEM_OUTLINE("Item outline"),
+	FEATHERED_PULSE("Feathered pulse"),
 	ITEM_OUTLINE_AND_FILL("Outline + fill"),
 	BOX("Box border"),
 	UNDERLINE("Underline"),
