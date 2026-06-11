@@ -76,6 +76,19 @@ public interface BankHighlightSearchConfig extends Config
 		return 3;
 	}
 
+	@Range(max = 300)
+	@Units(Units.SECONDS)
+	@ConfigItem(
+		keyName = "searchDuration",
+		name = "Highlight duration",
+		description = "Hide highlights this long after a search (0 = keep until next search or bank close)",
+		position = 5
+	)
+	default int searchDuration()
+	{
+		return 0;
+	}
+
 	@ConfigSection(
 		name = "Feathered pulse",
 		description = "Settings for the feathered pulse highlight style",

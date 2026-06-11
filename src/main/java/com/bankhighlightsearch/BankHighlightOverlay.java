@@ -48,6 +48,11 @@ class BankHighlightOverlay extends WidgetItemOverlay
 
 		final HighlightStyle style = config.highlightStyle();
 		final long sinceSearch = System.currentTimeMillis() - plugin.getSearchTime();
+		final int searchDuration = config.searchDuration();
+		if (searchDuration > 0 && sinceSearch > searchDuration * 1000L)
+		{
+			return; // highlight expired
+		}
 		final int blinkDuration = config.blinkDuration();
 		final boolean animating = blinkDuration == 0 || sinceSearch < blinkDuration * 1000L;
 
