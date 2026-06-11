@@ -131,7 +131,13 @@ public class BankHighlightSearchPlugin extends Plugin
 	{
 		if (searchInput != null)
 		{
-			return; // our prompt is already open
+			// Prompt is already open: clear the text so the user can start a fresh query.
+			// ChatboxTextInput.value() updates the internal buffer and calls cursorAt(),
+			// which schedules update() via clientThread.invoke() when built == true —
+			// so the on-screen widget redraws with an empty field.
+			searchInput.value("");
+			updateMatches("");
+			return;
 		}
 
 		final Widget bankItems = client.getWidget(InterfaceID.Bankmain.ITEMS);
