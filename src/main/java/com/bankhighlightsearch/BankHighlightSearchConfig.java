@@ -75,17 +75,17 @@ public interface BankHighlightSearchConfig extends Config
 		return 3;
 	}
 
-	@Range(min = 1, max = 10)
+	@Range(max = 10)
 	@Units(Units.PIXELS)
 	@ConfigItem(
 		keyName = "pulseMinFeather",
 		name = "Pulse min thickness",
-		description = "Feathered pulse: outline thickness at the low point of the pulse",
+		description = "Feathered pulse: feather at the low point of the pulse (0 = bare 1px outline)",
 		position = 5
 	)
 	default int pulseMinFeather()
 	{
-		return 1;
+		return 0;
 	}
 
 	@Range(min = 1, max = 10)

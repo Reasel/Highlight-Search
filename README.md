@@ -25,7 +25,7 @@ scroll the matches into view.
 | Highlight color | Orange | Outline color for matches |
 | Fill color | Orange, alpha 40 | Translucent fill for the fill styles (alpha 0 disables) |
 | Blink duration | 3 s | Blink time before the outline turns solid (0 = blink forever) |
-| Pulse min thickness | 1 px | Feathered pulse: thickness at the low point |
+| Pulse min thickness | 0 px | Feathered pulse: feather at the low point (0 = bare outline) |
 | Pulse max thickness | 4 px | Feathered pulse: thickness at the peak |
 | Highlight placeholders | On | Match placeholders by name |
 | Match variations | On | Highlight dose/charge variants of matches |
