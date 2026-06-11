@@ -1,0 +1,33 @@
+name: Plugin Hub bump PR
+
+# Deliberate triggers only: pushing a version tag, or the Run-workflow button.
+# Do NOT trigger on every push to master — each hub PR pings the RuneLite
+# maintainers, so a bump should mean "tested and ready to ship".
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # the deploy script verifies HEAD == origin/master
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Open hub bump PR
+        env:
+          # Classic PAT with public_repo scope, from the account that owns the
+          # plugin-hub fork. Settings -> Secrets -> Actions -> HUB_PAT.
+          GH_TOKEN: ${{ secrets.HUB_PAT }}
+        run: ./deploy/deploy.sh --yes --skip-build
