@@ -73,7 +73,14 @@ trap 'rm -rf "$work"' EXIT
 echo "==> cloning upstream hub"
 git clone --quiet --depth 1 "https://github.com/$HUB_REPO.git" "$work"
 cd "$work"
-git remote add fork "https://github.com/$gh_user/plugin-hub.git"
+# OAuth tokens without 'workflow' scope can't push upstream's workflow files
+# to a fresh fork over https; prefer ssh locally, keep https for CI (GH_TOKEN)
+if [[ -z ${GH_TOKEN:-} && $(gh config get git_protocol 2>/dev/null) == ssh ]]; then
+	fork_url="git@github.com:$gh_user/plugin-hub.git"
+else
+	fork_url="https://github.com/$gh_user/plugin-hub.git"
+fi
+git remote add fork "$fork_url"
 
 hub_file="plugins/$PLUGIN_NAME"
 if [[ -f $hub_file ]]; then
