@@ -13,6 +13,7 @@ import net.runelite.api.Client;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.MenuAction;
 import net.runelite.api.ScriptID;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptPostFired;
@@ -25,6 +26,7 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
@@ -67,12 +69,14 @@ public class BankHighlightSearchPlugin extends Plugin
 	@Inject
 	private BankHighlightOverlay overlay;
 
+	private static final int POTIONSTORE_TAB = 15;
+
 	private volatile Set<Integer> matches = Collections.emptySet();
 
 	@Getter
 	private volatile long searchTime;
 
-	private boolean pendingScroll;
+	private volatile boolean pendingScroll;
 	private String lastQuery = "";
 	private ChatboxTextInput searchInput;
 
@@ -107,7 +111,7 @@ public class BankHighlightSearchPlugin extends Plugin
 		pendingScroll = false;
 		clientThread.invoke(() ->
 		{
-			if (searchInput != null)
+			if (searchInput != null && chatboxPanelManager.getCurrentInput() == searchInput)
 			{
 				chatboxPanelManager.close();
 				searchInput = null;
@@ -195,7 +199,7 @@ public class BankHighlightSearchPlugin extends Plugin
 			items.add(new SearchMatcher.BankItem(id, comp.getName()));
 		}
 
-		return SearchMatcher.match(items, q, config.includeVariations(), ItemVariationMapping::map);
+		return SearchMatcher.match(items, q, config.includeVariations(), id -> ItemVariationMapping.map(itemManager.canonicalize(id)));
 	}
 
 	// client thread
@@ -204,6 +208,13 @@ public class BankHighlightSearchPlugin extends Plugin
 		if (matches.isEmpty())
 		{
 			return;
+		}
+
+		// closing the potion store via its button is required before switching tabs;
+		// leaving it open in the background breaks deposits (see core TabInterface)
+		if (client.getVarbitValue(VarbitID.BANK_CURRENTTAB) == POTIONSTORE_TAB)
+		{
+			client.menuAction(-1, InterfaceID.Bankmain.POTIONSTORE_BUTTON, MenuAction.CC_OP, 1, -1, "Potion store", "");
 		}
 
 		if (client.getVarbitValue(VarbitID.BANK_CURRENTTAB) != 0)
@@ -235,7 +246,9 @@ public class BankHighlightSearchPlugin extends Plugin
 		if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING && pendingScroll)
 		{
 			pendingScroll = false;
-			scrollToMatches();
+			// defer: runScript is not reentrant and BANKMAIN_FINISHBUILDING fires nested
+			// inside bankmain_build; scroll after all scripts for this tick finish
+			clientThread.invokeAtTickEnd(this::scrollToMatches);
 		}
 	}
 
@@ -248,7 +261,7 @@ public class BankHighlightSearchPlugin extends Plugin
 		}
 	}
 
-	// client thread (ScriptPostFired handler)
+	// runs at tick end on the client thread
 	private void scrollToMatches()
 	{
 		final Widget bankItems = client.getWidget(InterfaceID.Bankmain.ITEMS);
@@ -283,6 +296,15 @@ public class BankHighlightSearchPlugin extends Plugin
 		{
 			matches = Collections.emptySet();
 			pendingScroll = false;
+		}
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (BankHighlightSearchConfig.GROUP.equals(event.getGroup()))
+		{
+			clientThread.invoke(this::refreshMatches);
 		}
 	}
 }
