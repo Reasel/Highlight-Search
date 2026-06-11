@@ -16,7 +16,6 @@ class BankHighlightOverlay extends WidgetItemOverlay
 {
 	private static final long BLINK_PERIOD_MS = 300;
 	private static final long PULSE_PERIOD_MS = 900;
-	private static final int MAX_FEATHER = 6;
 
 	private final BankHighlightSearchPlugin plugin;
 	private final BankHighlightSearchConfig config;
@@ -93,9 +92,11 @@ class BankHighlightOverlay extends WidgetItemOverlay
 
 	private int pulseFeather(long sinceSearch)
 	{
+		final int min = config.pulseMinFeather();
+		final int max = Math.max(min, config.pulseMaxFeather());
 		final double phase = (sinceSearch % PULSE_PERIOD_MS) / (double) PULSE_PERIOD_MS;
 		final double tri = phase < 0.5 ? phase * 2 : 2 - phase * 2;
-		return 1 + (int) Math.round(tri * (MAX_FEATHER - 1));
+		return min + (int) Math.round(tri * (max - min));
 	}
 
 	private void drawGlow(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color, int feather)

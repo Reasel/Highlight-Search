@@ -75,11 +75,37 @@ public interface BankHighlightSearchConfig extends Config
 		return 3;
 	}
 
+	@Range(min = 1, max = 10)
+	@Units(Units.PIXELS)
+	@ConfigItem(
+		keyName = "pulseMinFeather",
+		name = "Pulse min thickness",
+		description = "Feathered pulse: outline thickness at the low point of the pulse",
+		position = 5
+	)
+	default int pulseMinFeather()
+	{
+		return 1;
+	}
+
+	@Range(min = 1, max = 10)
+	@Units(Units.PIXELS)
+	@ConfigItem(
+		keyName = "pulseMaxFeather",
+		name = "Pulse max thickness",
+		description = "Feathered pulse: outline thickness at the peak of the pulse",
+		position = 6
+	)
+	default int pulseMaxFeather()
+	{
+		return 4;
+	}
+
 	@ConfigItem(
 		keyName = "highlightPlaceholders",
 		name = "Highlight placeholders",
 		description = "Also highlight bank placeholders whose name matches",
-		position = 5
+		position = 7
 	)
 	default boolean highlightPlaceholders()
 	{
@@ -90,7 +116,7 @@ public interface BankHighlightSearchConfig extends Config
 		keyName = "includeVariations",
 		name = "Match variations",
 		description = "Also highlight charge/dose variations of matched items",
-		position = 6
+		position = 8
 	)
 	default boolean includeVariations()
 	{
