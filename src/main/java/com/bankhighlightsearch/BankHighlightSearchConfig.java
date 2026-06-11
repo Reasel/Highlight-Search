@@ -81,7 +81,7 @@ public interface BankHighlightSearchConfig extends Config
 	@ConfigItem(
 		keyName = "searchDuration",
 		name = "Highlight duration",
-		description = "Hide highlights this long after a search (0 = keep until next search or bank close)",
+		description = "How long highlights stay visible after a search (0 = until next search or bank close)",
 		position = 5
 	)
 	default int searchDuration()

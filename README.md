@@ -25,7 +25,7 @@ scroll the matches into view.
 | Highlight color | Orange | Outline color for matches |
 | Fill color | Orange, alpha 40 | Translucent fill for the fill styles (alpha 0 disables) |
 | Blink duration | 3 s | Blink time before the outline turns solid (0 = blink forever) |
-| Highlight duration | 0 s | Hide highlights this long after a search (0 = keep until next search or bank close) |
+| Highlight duration | 0 s | How long highlights stay visible after a search (0 = until next search or bank close) |
 | **Feathered pulse** (section) | — | Collapsed section for pulse-specific settings |
 | Pulse min thickness | 0 px | Feathered pulse: feather at the low point (0 = bare outline) |
 | Pulse max thickness | 4 px | Feathered pulse: thickness at the peak |
