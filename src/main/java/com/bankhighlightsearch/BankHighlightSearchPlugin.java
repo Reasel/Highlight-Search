@@ -276,7 +276,7 @@ public class BankHighlightSearchPlugin extends Plugin
 		}
 	}
 
-	// runs at tick end on the client thread
+	// runs at tick end on the client thread; scrolls so the densest cluster of matches is visible
 	private void scrollToMatches()
 	{
 		final Widget bankItems = client.getWidget(InterfaceID.Bankmain.ITEMS);
@@ -294,7 +294,7 @@ public class BankHighlightSearchPlugin extends Plugin
 			}
 		}
 
-		final int scrollY = ScrollCalculator.centroidScrollY(centers, bankItems.getHeight(), bankItems.getScrollHeight());
+		final int scrollY = ScrollCalculator.densestClusterScrollY(centers, bankItems.getHeight(), bankItems.getScrollHeight());
 		if (scrollY < 0)
 		{
 			return;

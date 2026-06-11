@@ -11,7 +11,7 @@ scroll the matches into view.
 - Live highlighting as you type — items blink briefly, then stay outlined
 - Feathered pulse style: the outline glow breathes instead of blinking
 - Press Enter to keep highlights (until bank close or a new search); Esc cancels them instantly
-- Enter switches to the ALL tab and scrolls to the matches
+- Enter switches to the ALL tab and scrolls to where the most matches are visible
 - Matches charge/dose variations (Prayer potion(1–4), jewellery charges) — toggleable
 - Highlights placeholders too — toggleable
 - Configurable highlight style, colors, and blink duration
