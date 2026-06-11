@@ -35,15 +35,52 @@ class BankHighlightOverlay extends WidgetItemOverlay
 		}
 
 		final long sinceSearch = System.currentTimeMillis() - plugin.getSearchTime();
-		if (sinceSearch < config.blinkDuration() * 1000L && (sinceSearch / BLINK_PERIOD_MS) % 2 == 1)
+		final int blinkDuration = config.blinkDuration();
+		final boolean blinking = blinkDuration == 0 || sinceSearch < blinkDuration * 1000L;
+		if (blinking && (sinceSearch / BLINK_PERIOD_MS) % 2 == 1)
 		{
 			return; // off-phase of the blink
 		}
 
 		final Rectangle bounds = widgetItem.getCanvasBounds();
-		final BufferedImage outline = itemManager.getItemOutline(itemId, widgetItem.getQuantity(), config.highlightColor());
-		graphics.drawImage(outline, bounds.x, bounds.y, null);
+		final Color color = config.highlightColor();
 
+		switch (config.highlightStyle())
+		{
+			case ITEM_OUTLINE:
+				drawOutline(graphics, itemId, widgetItem, color);
+				break;
+			case ITEM_OUTLINE_AND_FILL:
+				drawOutline(graphics, itemId, widgetItem, color);
+				drawFill(graphics, bounds);
+				break;
+			case BOX:
+				graphics.setColor(color);
+				graphics.drawRect(bounds.x, bounds.y, bounds.width - 1, bounds.height - 1);
+				break;
+			case UNDERLINE:
+				// Geometry mirrored from InventoryTagsOverlay lines 101-104:
+				// heightOffSet = bounds.getY() + bounds.getHeight() + 2
+				// drawLine(bounds.getX(), heightOffSet, bounds.getX() + bounds.getWidth(), heightOffSet)
+				int heightOffSet = (int) bounds.getY() + (int) bounds.getHeight() + 2;
+				graphics.setColor(color);
+				graphics.drawLine((int) bounds.getX(), heightOffSet, (int) bounds.getX() + (int) bounds.getWidth(), heightOffSet);
+				break;
+			case FILL:
+				drawFill(graphics, bounds);
+				break;
+		}
+	}
+
+	private void drawOutline(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color)
+	{
+		final BufferedImage outline = itemManager.getItemOutline(itemId, widgetItem.getQuantity(), color);
+		final Rectangle bounds = widgetItem.getCanvasBounds();
+		graphics.drawImage(outline, bounds.x, bounds.y, null);
+	}
+
+	private void drawFill(Graphics2D graphics, Rectangle bounds)
+	{
 		final Color fill = config.fillColor();
 		if (fill.getAlpha() > 0)
 		{

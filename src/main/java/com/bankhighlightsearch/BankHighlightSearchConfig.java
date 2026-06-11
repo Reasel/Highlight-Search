@@ -27,12 +27,23 @@ public interface BankHighlightSearchConfig extends Config
 		return new Keybind(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 	}
 
+	@ConfigItem(
+		keyName = "highlightStyle",
+		name = "Highlight style",
+		description = "How matching items are highlighted",
+		position = 1
+	)
+	default HighlightStyle highlightStyle()
+	{
+		return HighlightStyle.ITEM_OUTLINE;
+	}
+
 	@Alpha
 	@ConfigItem(
 		keyName = "highlightColor",
 		name = "Highlight color",
 		description = "Outline color for matching items",
-		position = 1
+		position = 2
 	)
 	default Color highlightColor()
 	{
@@ -43,8 +54,8 @@ public interface BankHighlightSearchConfig extends Config
 	@ConfigItem(
 		keyName = "fillColor",
 		name = "Fill color",
-		description = "Fill drawn over matching items (set alpha to 0 to disable)",
-		position = 2
+		description = "Fill color for the fill styles",
+		position = 3
 	)
 	default Color fillColor()
 	{
@@ -56,8 +67,8 @@ public interface BankHighlightSearchConfig extends Config
 	@ConfigItem(
 		keyName = "blinkDuration",
 		name = "Blink duration",
-		description = "How long highlights blink after a search before turning solid (0 = never blink)",
-		position = 3
+		description = "How long highlights blink after a search before turning solid (0 = blink forever)",
+		position = 4
 	)
 	default int blinkDuration()
 	{
@@ -68,7 +79,7 @@ public interface BankHighlightSearchConfig extends Config
 		keyName = "highlightPlaceholders",
 		name = "Highlight placeholders",
 		description = "Also highlight bank placeholders whose name matches",
-		position = 4
+		position = 5
 	)
 	default boolean highlightPlaceholders()
 	{
@@ -79,7 +90,7 @@ public interface BankHighlightSearchConfig extends Config
 		keyName = "includeVariations",
 		name = "Match variations",
 		description = "Also highlight charge/dose variations of matched items",
-		position = 5
+		position = 6
 	)
 	default boolean includeVariations()
 	{

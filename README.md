@@ -13,16 +13,17 @@ scroll the matches into view.
 - Enter switches to the ALL tab and scrolls to the matches
 - Matches charge/dose variations (Prayer potion(1–4), jewellery charges) — toggleable
 - Highlights placeholders too — toggleable
-- Configurable colors, fill opacity, and blink duration
+- Configurable highlight style, colors, and blink duration
 
 ## Settings
 
 | Setting | Default | Description |
 |---|---|---|
 | Search hotkey | Ctrl+Shift+F | Opens the highlight search prompt |
+| Highlight style | Item outline | Outline, outline+fill, box, underline, or filled box |
 | Highlight color | Orange | Outline color for matches |
-| Fill color | Orange, alpha 40 | Translucent fill (alpha 0 disables) |
-| Blink duration | 3 s | Blink time before the outline turns solid (0 = never blink) |
+| Fill color | Orange, alpha 40 | Translucent fill for the fill styles (alpha 0 disables) |
+| Blink duration | 3 s | Blink time before the outline turns solid (0 = blink forever) |
 | Highlight placeholders | On | Match placeholders by name |
 | Match variations | On | Highlight dose/charge variants of matches |
 
