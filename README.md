@@ -5,6 +5,8 @@ type a query, and matching items get a blinking highlight — instead of the nat
 search behavior of hiding everything else. Press **Enter** to jump to the ALL tab and
 scroll the matches into view.
 
+![Demo: searching "dragon" highlights matching items instead of hiding the rest](assets/demo.webp)
+
 ## Features
 
 - Bindable hotkey opens a search prompt (only while the bank is open)
