@@ -88,12 +88,9 @@ class BankHighlightOverlay extends WidgetItemOverlay
 				graphics.drawRect(bounds.x, bounds.y, bounds.width - 1, bounds.height - 1);
 				break;
 			case UNDERLINE:
-				// Geometry mirrored from InventoryTagsOverlay lines 101-104:
-				// heightOffSet = bounds.getY() + bounds.getHeight() + 2
-				// drawLine(bounds.getX(), heightOffSet, bounds.getX() + bounds.getWidth(), heightOffSet)
-				int heightOffSet = (int) bounds.getY() + (int) bounds.getHeight() + 2;
+				final int underlineY = bounds.y + bounds.height + 2;
 				graphics.setColor(color);
-				graphics.drawLine((int) bounds.getX(), heightOffSet, (int) bounds.getX() + (int) bounds.getWidth(), heightOffSet);
+				graphics.drawLine(bounds.x, underlineY, bounds.x + bounds.width, underlineY);
 				break;
 			case FILL:
 				drawFill(graphics, bounds);
@@ -113,8 +110,7 @@ class BankHighlightOverlay extends WidgetItemOverlay
 	private void drawGlow(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color, int feather)
 	{
 		final int quantity = widgetItem.getQuantity();
-		// Outline uses quantity=1 so no stack-text glyphs are baked into the outline shape;
-		// quantity is still part of the key because the mask (which uses real quantity) does vary.
+		// quantity is part of the key because the punch-out mask varies with it
 		final long key = ((long) itemId << 36) | ((long) quantity << 4) | feather;
 		BufferedImage glow = glowCache.get(key);
 		if (glow == null)
@@ -123,13 +119,10 @@ class BankHighlightOverlay extends WidgetItemOverlay
 			{
 				glowCache.clear();
 			}
-			// Use quantity=1 so the outline hugs only the item sprite with no stack-text rendering.
+			// outline with quantity=1 so no stack-text glyphs are baked into the glow shape
 			final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
-			// Build the punch-out mask with the real quantity and STACKABLE mode so the
-			// quantity digits are rendered in the mask exactly where the bank draws them.
-			// DstOut erases those pixels from the glow, keeping the numbers readable.
-			// Mirrors ItemManager.loadItemOutline but border=0 (no extra bleed) and
-			// stackable=STACKABLE so text appears for qty > 1.
+			// punch-out mask with the real quantity and STACKABLE mode so the digits land
+			// exactly where the bank draws them; DstOut erases those pixels from the glow
 			final SpritePixels spritePixels = client.createItemSprite(
 				itemId, quantity, 0, 0, ItemQuantityMode.STACKABLE, false, CLIENT_DEFAULT_ZOOM);
 			final BufferedImage mask = spritePixels != null ? spritePixels.toBufferedImage() : outline;
@@ -179,8 +172,7 @@ class BankHighlightOverlay extends WidgetItemOverlay
 
 	private void drawOutline(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color)
 	{
-		// Use quantity=1 so no stack-text glyphs are baked into the outline shape;
-		// the game's own quantity text sits above the item layer and remains readable.
+		// quantity=1 so no stack-text glyphs are baked into the outline shape
 		final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
 		final Rectangle bounds = widgetItem.getCanvasBounds();
 		graphics.drawImage(outline, bounds.x, bounds.y, null);

@@ -14,22 +14,6 @@ scroll the matches into view.
 - Enter switches to the ALL tab and scrolls to where the most matches are visible
 - Matches charge/dose variations (Prayer potion(1–4), jewellery charges) — toggleable
 - Highlights placeholders too — toggleable
-- Configurable highlight style, colors, and blink duration
-
-## Settings
-
-| Setting | Default | Description |
-|---|---|---|
-| Search hotkey | Ctrl+Shift+F | Opens the highlight search prompt |
-| Highlight style | Item outline | Outline, feathered pulse, outline+fill, box, underline, or filled box |
-| Highlight color | Orange | Outline color for matches |
-| Fill color | Orange, alpha 40 | Translucent fill for the fill styles (alpha 0 disables) |
-| Blink duration | 3 s | Blink time before the outline turns solid (0 = blink forever) |
-| Highlight duration | 0 s | How long highlights stay visible after a search (0 = until next search or bank close) |
-| **Feathered pulse** (section) | — | Collapsed section for pulse-specific settings |
-| Pulse min thickness | 0 px | Feathered pulse: feather at the low point (0 = bare outline) |
-| Pulse max thickness | 4 px | Feathered pulse: thickness at the peak |
-| Highlight placeholders | On | Match placeholders by name |
-| Match variations | On | Highlight dose/charge variants of matches |
+- Configurable highlight style, colors, and blink/highlight durations
 
 This plugin never modifies the native bank search or filters items — it only draws on top.

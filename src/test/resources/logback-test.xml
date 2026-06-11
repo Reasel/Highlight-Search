@@ -52,5 +52,4 @@
 		<appender-ref ref="STDOUT"/>
 		<appender-ref ref="FILE"/>
 	</root>
-	<logger name="com.bankhighlightsearch" level="DEBUG" />
 </configuration>

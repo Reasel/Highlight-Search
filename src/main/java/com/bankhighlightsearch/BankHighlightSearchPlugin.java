@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
@@ -38,7 +37,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 
-@Slf4j
 @PluginDescriptor(
 	name = "Bank Highlight Search",
 	description = "Search the bank with a hotkey and highlight matches instead of filtering them out",
@@ -46,6 +44,8 @@ import net.runelite.client.util.HotkeyListener;
 )
 public class BankHighlightSearchPlugin extends Plugin
 {
+	private static final int POTIONSTORE_TAB = 15;
+
 	@Inject
 	private Client client;
 
@@ -70,8 +70,6 @@ public class BankHighlightSearchPlugin extends Plugin
 	@Inject
 	private BankHighlightOverlay overlay;
 
-	private static final int POTIONSTORE_TAB = 15;
-
 	private volatile Set<Integer> matches = Collections.emptySet();
 
 	@Getter
@@ -87,7 +85,7 @@ public class BankHighlightSearchPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			clientThread.invoke(() -> openSearch());
+			clientThread.invoke(BankHighlightSearchPlugin.this::openSearch);
 		}
 	};
 
@@ -131,10 +129,7 @@ public class BankHighlightSearchPlugin extends Plugin
 	{
 		if (searchInput != null)
 		{
-			// Prompt is already open: clear the text so the user can start a fresh query.
-			// ChatboxTextInput.value() updates the internal buffer and calls cursorAt(),
-			// which schedules update() via clientThread.invoke() when built == true —
-			// so the on-screen widget redraws with an empty field.
+			// prompt already open: clear it for a fresh query (value() redraws the open widget)
 			searchInput.value("");
 			updateMatches("");
 			return;
