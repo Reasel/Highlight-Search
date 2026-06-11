@@ -108,6 +108,8 @@ class BankHighlightOverlay extends WidgetItemOverlay
 	private void drawGlow(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color, int feather)
 	{
 		final int quantity = widgetItem.getQuantity();
+		// Outline uses quantity=1 so no stack-text glyphs are baked into the outline shape;
+		// quantity is still part of the key because the mask (which uses real quantity) does vary.
 		final long key = ((long) itemId << 36) | ((long) quantity << 4) | feather;
 		BufferedImage glow = glowCache.get(key);
 		if (glow == null)
@@ -116,12 +118,15 @@ class BankHighlightOverlay extends WidgetItemOverlay
 			{
 				glowCache.clear();
 			}
-			final BufferedImage outline = itemManager.getItemOutline(itemId, quantity, color);
-			// Build a no-shadow, no-border sprite to use as the punch-out mask.
-			// Mirrors ItemManager.loadItemOutline (line 560) but with border=0 so the
-			// mask silhouette sits within the same 36x32 canvas without extra bleed.
+			// Use quantity=1 so the outline hugs only the item sprite with no stack-text rendering.
+			final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
+			// Build the punch-out mask with the real quantity and STACKABLE mode so the
+			// quantity digits are rendered in the mask exactly where the bank draws them.
+			// DstOut erases those pixels from the glow, keeping the numbers readable.
+			// Mirrors ItemManager.loadItemOutline but border=0 (no extra bleed) and
+			// stackable=STACKABLE so text appears for qty > 1.
 			final SpritePixels spritePixels = client.createItemSprite(
-				itemId, quantity, 0, 0, ItemQuantityMode.NEVER, false, CLIENT_DEFAULT_ZOOM);
+				itemId, quantity, 0, 0, ItemQuantityMode.STACKABLE, false, CLIENT_DEFAULT_ZOOM);
 			final BufferedImage mask = spritePixels != null ? spritePixels.toBufferedImage() : outline;
 			glow = buildGlow(outline, mask, feather);
 			glowCache.put(key, glow);
@@ -169,7 +174,9 @@ class BankHighlightOverlay extends WidgetItemOverlay
 
 	private void drawOutline(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color)
 	{
-		final BufferedImage outline = itemManager.getItemOutline(itemId, widgetItem.getQuantity(), color);
+		// Use quantity=1 so no stack-text glyphs are baked into the outline shape;
+		// the game's own quantity text sits above the item layer and remains readable.
+		final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
 		final Rectangle bounds = widgetItem.getCanvasBounds();
 		graphics.drawImage(outline, bounds.x, bounds.y, null);
 	}
