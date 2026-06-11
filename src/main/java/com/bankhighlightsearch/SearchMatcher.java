@@ -2,6 +2,7 @@ package com.bankhighlightsearch;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.IntUnaryOperator;
 import lombok.Value;
@@ -25,7 +26,7 @@ final class SearchMatcher
 	 */
 	static Set<Integer> match(Collection<BankItem> items, String query, boolean includeVariations, IntUnaryOperator variationBase)
 	{
-		final String q = query.trim().toLowerCase();
+		final String q = query.trim().toLowerCase(Locale.ROOT);
 		final Set<Integer> matched = new HashSet<>();
 		if (q.isEmpty())
 		{
@@ -35,7 +36,7 @@ final class SearchMatcher
 		final Set<Integer> matchedBases = new HashSet<>();
 		for (BankItem item : items)
 		{
-			if (item.getName().toLowerCase().contains(q))
+			if (item.getName().toLowerCase(Locale.ROOT).contains(q))
 			{
 				matched.add(item.getId());
 				if (includeVariations)
