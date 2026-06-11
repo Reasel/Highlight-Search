@@ -77,6 +77,7 @@ public class BankHighlightSearchPlugin extends Plugin
 	private volatile long searchTime;
 
 	private volatile boolean pendingScroll;
+	private volatile boolean searchSubmitted;
 	private String lastQuery = "";
 	private ChatboxTextInput searchInput;
 
@@ -142,15 +143,29 @@ public class BankHighlightSearchPlugin extends Plugin
 			return; // another chatbox input is active (chat, native search, ...)
 		}
 
+		matches = Collections.emptySet();
+		lastQuery = "";
+		searchSubmitted = false;
+
 		searchInput = chatboxPanelManager.openTextInput("Highlight search:")
-			.value(lastQuery)
 			.onChanged(q -> clientThread.invoke(() -> updateMatches(q)))
-			.onDone((Consumer<String>) q -> clientThread.invoke(() ->
+			.onDone((Consumer<String>) q ->
 			{
-				updateMatches(q);
-				goToAllTabAndScroll();
-			}))
-			.onClose(() -> searchInput = null)
+				searchSubmitted = true;
+				clientThread.invoke(() ->
+				{
+					updateMatches(q);
+					goToAllTabAndScroll();
+				});
+			})
+			.onClose(() ->
+			{
+				searchInput = null;
+				if (!searchSubmitted)
+				{
+					matches = Collections.emptySet();
+				}
+			})
 			.build();
 	}
 

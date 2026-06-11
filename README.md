@@ -10,7 +10,7 @@ scroll the matches into view.
 - Bindable hotkey opens a search prompt (only while the bank is open)
 - Live highlighting as you type — items blink briefly, then stay outlined
 - Feathered pulse style: the outline glow breathes instead of blinking
-- Highlights persist until you close the bank or run a new search
+- Press Enter to keep highlights (until bank close or a new search); Esc cancels them instantly
 - Enter switches to the ALL tab and scrolls to the matches
 - Matches charge/dose variations (Prayer potion(1–4), jewellery charges) — toggleable
 - Highlights placeholders too — toggleable
