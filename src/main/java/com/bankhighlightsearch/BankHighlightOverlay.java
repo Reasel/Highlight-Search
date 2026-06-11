@@ -8,9 +8,13 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
+import net.runelite.api.Client;
+import net.runelite.api.SpritePixels;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.api.widgets.ItemQuantityMode;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
+import static net.runelite.api.Constants.CLIENT_DEFAULT_ZOOM;
 
 class BankHighlightOverlay extends WidgetItemOverlay
 {
@@ -20,15 +24,17 @@ class BankHighlightOverlay extends WidgetItemOverlay
 	private final BankHighlightSearchPlugin plugin;
 	private final BankHighlightSearchConfig config;
 	private final ItemManager itemManager;
+	private final Client client;
 
 	private final Map<Long, BufferedImage> glowCache = new HashMap<>();
 
 	@Inject
-	BankHighlightOverlay(BankHighlightSearchPlugin plugin, BankHighlightSearchConfig config, ItemManager itemManager)
+	BankHighlightOverlay(BankHighlightSearchPlugin plugin, BankHighlightSearchConfig config, ItemManager itemManager, Client client)
 	{
 		this.plugin = plugin;
 		this.config = config;
 		this.itemManager = itemManager;
+		this.client = client;
 		showOnBank();
 	}
 
@@ -110,21 +116,30 @@ class BankHighlightOverlay extends WidgetItemOverlay
 			{
 				glowCache.clear();
 			}
-			glow = buildGlow(itemManager.getItemOutline(itemId, quantity, color), feather);
+			final BufferedImage outline = itemManager.getItemOutline(itemId, quantity, color);
+			// Build a no-shadow, no-border sprite to use as the punch-out mask.
+			// Mirrors ItemManager.loadItemOutline (line 560) but with border=0 so the
+			// mask silhouette sits within the same 36x32 canvas without extra bleed.
+			final SpritePixels spritePixels = client.createItemSprite(
+				itemId, quantity, 0, 0, ItemQuantityMode.NEVER, false, CLIENT_DEFAULT_ZOOM);
+			final BufferedImage mask = spritePixels != null ? spritePixels.toBufferedImage() : outline;
+			glow = buildGlow(outline, mask, feather);
 			glowCache.put(key, glow);
 		}
 		final Rectangle bounds = widgetItem.getCanvasBounds();
 		graphics.drawImage(glow, bounds.x - feather, bounds.y - feather, null);
 	}
 
-	private static BufferedImage buildGlow(BufferedImage outline, int feather)
+	private static BufferedImage buildGlow(BufferedImage outline, BufferedImage mask, int feather)
 	{
 		final BufferedImage img = new BufferedImage(outline.getWidth() + 2 * feather, outline.getHeight() + 2 * feather, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g = img.createGraphics();
-		// stamp the outline in expanding rings with falling alpha for a soft feathered halo
+		// stamp the outline in expanding rings with quadratic falloff so the glow
+		// dims harder with distance from the item
 		for (int d = feather; d >= 1; d--)
 		{
-			final float alpha = 0.6f * (1f - (float) (d - 1) / feather);
+			final float f = 1f - (float) (d - 1) / feather;
+			final float alpha = 0.6f * f * f;
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 			for (int dx = -1; dx <= 1; dx++)
 			{
@@ -137,6 +152,10 @@ class BankHighlightOverlay extends WidgetItemOverlay
 				}
 			}
 		}
+		// punch out the item silhouette so the glow never covers the item sprite
+		g.setComposite(AlphaComposite.DstOut);
+		g.drawImage(mask, feather, feather, null);
+		// draw the crisp 1px outline on top at full opacity
 		g.setComposite(AlphaComposite.SrcOver);
 		g.drawImage(outline, feather, feather, null);
 		g.dispose();
