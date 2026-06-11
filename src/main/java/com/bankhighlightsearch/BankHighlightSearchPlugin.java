@@ -14,6 +14,7 @@ import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ScriptID;
+import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.gameval.InterfaceID;
@@ -122,8 +123,13 @@ public class BankHighlightSearchPlugin extends Plugin
 	// client thread
 	private void openSearch()
 	{
+		if (searchInput != null)
+		{
+			return; // our prompt is already open
+		}
+
 		final Widget bankItems = client.getWidget(InterfaceID.Bankmain.ITEMS);
-		if (bankItems == null || bankItems.isSelfHidden())
+		if (bankItems == null || bankItems.isHidden())
 		{
 			return; // bank not open
 		}
@@ -148,17 +154,29 @@ public class BankHighlightSearchPlugin extends Plugin
 	private void updateMatches(String query)
 	{
 		lastQuery = query == null ? "" : query;
-		final String q = lastQuery.trim();
+		matches = computeMatches(lastQuery);
+		searchTime = System.currentTimeMillis();
+	}
+
+	// client thread; recompute without restarting the blink animation
+	private void refreshMatches()
+	{
+		matches = computeMatches(lastQuery);
+	}
+
+	// client thread
+	private Set<Integer> computeMatches(String query)
+	{
+		final String q = query.trim();
 		if (q.isEmpty())
 		{
-			matches = Collections.emptySet();
-			return;
+			return Collections.emptySet();
 		}
 
 		final ItemContainer bank = client.getItemContainer(InventoryID.BANK);
 		if (bank == null)
 		{
-			return;
+			return matches; // container unavailable; keep current highlights
 		}
 
 		final List<SearchMatcher.BankItem> items = new ArrayList<>();
@@ -177,8 +195,7 @@ public class BankHighlightSearchPlugin extends Plugin
 			items.add(new SearchMatcher.BankItem(id, comp.getName()));
 		}
 
-		matches = SearchMatcher.match(items, q, config.includeVariations(), ItemVariationMapping::map);
-		searchTime = System.currentTimeMillis();
+		return SearchMatcher.match(items, q, config.includeVariations(), ItemVariationMapping::map);
 	}
 
 	// client thread
@@ -200,10 +217,16 @@ public class BankHighlightSearchPlugin extends Plugin
 			return;
 		}
 
+		final Object[] buildArgs = bankItems.getOnInvTransmitListener();
+		if (buildArgs == null)
+		{
+			return;
+		}
+
 		// rebuild the bank the same way BankSearch.layoutBank() does; BANKMAIN_FINISHBUILDING
 		// fires during this call and onScriptPostFired performs the scroll
 		pendingScroll = true;
-		client.runScript(bankItems.getOnInvTransmitListener());
+		client.runScript(buildArgs);
 	}
 
 	@Subscribe
@@ -213,6 +236,15 @@ public class BankHighlightSearchPlugin extends Plugin
 		{
 			pendingScroll = false;
 			scrollToMatches();
+		}
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event)
+	{
+		if (event.getContainerId() == InventoryID.BANK && !matches.isEmpty())
+		{
+			refreshMatches();
 		}
 	}
 
@@ -247,7 +279,7 @@ public class BankHighlightSearchPlugin extends Plugin
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed event)
 	{
-		if (event.getGroupId() == InterfaceID.BANKMAIN)
+		if (event.getGroupId() == InterfaceID.BANKMAIN && event.isUnload())
 		{
 			matches = Collections.emptySet();
 			pendingScroll = false;
