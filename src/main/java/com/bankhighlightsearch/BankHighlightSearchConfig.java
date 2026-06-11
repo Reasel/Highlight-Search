@@ -7,6 +7,7 @@ import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
 import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
@@ -75,13 +76,22 @@ public interface BankHighlightSearchConfig extends Config
 		return 3;
 	}
 
+	@ConfigSection(
+		name = "Feathered pulse",
+		description = "Settings for the feathered pulse highlight style",
+		position = 6,
+		closedByDefault = true
+	)
+	String pulseSection = "pulseSection";
+
 	@Range(max = 10)
 	@Units(Units.PIXELS)
 	@ConfigItem(
 		keyName = "pulseMinFeather",
 		name = "Pulse min thickness",
 		description = "Feathered pulse: feather at the low point of the pulse (0 = bare 1px outline)",
-		position = 5
+		position = 0,
+		section = pulseSection
 	)
 	default int pulseMinFeather()
 	{
@@ -94,7 +104,8 @@ public interface BankHighlightSearchConfig extends Config
 		keyName = "pulseMaxFeather",
 		name = "Pulse max thickness",
 		description = "Feathered pulse: outline thickness at the peak of the pulse",
-		position = 6
+		position = 1,
+		section = pulseSection
 	)
 	default int pulseMaxFeather()
 	{
