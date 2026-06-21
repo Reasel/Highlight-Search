@@ -228,10 +228,16 @@ public class BankHighlightSearchPlugin extends Plugin
 		}
 
 		// closing the potion store via its button is required before switching tabs;
-		// leaving it open in the background breaks deposits (see core TabInterface)
+		// leaving it open in the background breaks deposits (see core TabInterface).
+		// run the button's own onOp clientscript rather than client.menuAction, which the
+		// plugin hub disallows; this mirrors the getOnInvTransmitListener+runScript path below
 		if (client.getVarbitValue(VarbitID.BANK_CURRENTTAB) == POTIONSTORE_TAB)
 		{
-			client.menuAction(-1, InterfaceID.Bankmain.POTIONSTORE_BUTTON, MenuAction.CC_OP, 1, -1, "Potion store", "");
+			final Widget potionStoreButton = client.getWidget(InterfaceID.Bankmain.POTIONSTORE_BUTTON);
+			if (potionStoreButton != null && potionStoreButton.getOnOpListener() != null)
+			{
+				client.runScript(potionStoreButton.getOnOpListener());
+			}
 		}
 
 		if (client.getVarbitValue(VarbitID.BANK_CURRENTTAB) != 0)
