@@ -119,8 +119,9 @@ class BankHighlightOverlay extends WidgetItemOverlay
 			{
 				glowCache.clear();
 			}
-			// outline with quantity=1 so no stack-text glyphs are baked into the glow shape
-			final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
+			// real quantity so the outline uses the same stack-model variant the bank
+			// renders; getItemOutline never bakes stack-text glyphs (ItemQuantityMode.NEVER)
+			final BufferedImage outline = itemManager.getItemOutline(itemId, quantity, color);
 			// punch-out mask with the real quantity and STACKABLE mode so the digits land
 			// exactly where the bank draws them; DstOut erases those pixels from the glow
 			final SpritePixels spritePixels = client.createItemSprite(
@@ -172,8 +173,9 @@ class BankHighlightOverlay extends WidgetItemOverlay
 
 	private void drawOutline(Graphics2D graphics, int itemId, WidgetItem widgetItem, Color color)
 	{
-		// quantity=1 so no stack-text glyphs are baked into the outline shape
-		final BufferedImage outline = itemManager.getItemOutline(itemId, 1, color);
+		// real quantity so the outline uses the same stack-model variant the bank
+		// renders; getItemOutline never bakes stack-text glyphs (ItemQuantityMode.NEVER)
+		final BufferedImage outline = itemManager.getItemOutline(itemId, widgetItem.getQuantity(), color);
 		final Rectangle bounds = widgetItem.getCanvasBounds();
 		graphics.drawImage(outline, bounds.x, bounds.y, null);
 	}
