@@ -85,8 +85,9 @@ git remote add fork "$fork_url"
 hub_file="plugins/$PLUGIN_NAME"
 if [[ -f $hub_file ]]; then
 	mode="bump"
+	version=$(sed -n 's/^version=//p' "$repo_root/runelite-plugin.properties")
 	branch="update-$PLUGIN_NAME-$short"
-	title="Update $PLUGIN_TITLE to $short"
+	title="Update $PLUGIN_TITLE to ${version:-$short}"
 	body="Updates $PLUGIN_TITLE to https://github.com/${https_url#https://github.com/}"
 	body="${body%.git}/commit/$sha"
 else
